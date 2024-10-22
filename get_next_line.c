@@ -20,46 +20,46 @@ char	*free_memory(char *buffer, char *lines)
 	return (NULL);
 }
 
-char	*read_fd(int fd, char *lines)
+char	*get_fd(int fd, char *buffer)
 {
-	int		bytes;
-	char	*temporal_buffer;
+	char	*temp_bytes;
+	int		read_bytes;
 
-	bytes = 1;
-	temporal_buffer = malloc((BUFFER_SIZE + 1) * sizeof(char));
-	if (!temporal_buffer)
-		return (free_memory(NULL, lines));
-	while ((!lines || !ft_strchr(lines, '\n')))
+	if (fd < 0)
+		return (free_memory(NULL, buffer));
+	temp_bytes = malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!temp_bytes)
+		return (free_memory(NULL, buffer));
+	while (!buffer || !ft_strchr(buffer, '\n'))
 	{
-		bytes = read(fd, temporal_buffer, BUFFER_SIZE);
-		if (bytes == -1)
-			return(free_memory(temporal_buffer, lines));
-		if (ft_strchr(temporal_buffer, '\n'))
-		{
-			temporal_buffer[bytes] = '\0';
-			lines = ft_strjoin(lines, temporal_buffer);
-			lines = ft_strjoin(lines, "\n");
-		}
-		if (!lines)
-			return (free_memory(temporal_buffer, NULL));
+		read_bytes = read(fd, temp_bytes, BUFFER_SIZE);
+		if (!read_bytes)
+			return(free_memory(temp_bytes, buffer));
+		temp_bytes[read_bytes] = '\0';
+		buffer = ft_strjoin(buffer, temp_bytes);
+		if (!buffer)
+			return(free_memory(temp_bytes, buffer));
 	}
-	free(temporal_buffer);
-	return (lines);
+	free(temp_bytes);
+	return (buffer);
 }
 
 char	*get_next_line(int fd)
 {
 	static char	*line = NULL;
+	char		*get_line;
 
-	line = read_fd(fd, line);
+	line = get_fd(fd, line);
 	if (!line)
 		return (NULL);
 	if (*line == '\0')
 	{
 		free(line);
+		line = NULL;
 		return (NULL);
 	}
-	return (line);
+	get_line = set_line(line);
+	return (get_line);
 }
 #include <fcntl.h>
 #include <stdio.h>
@@ -70,6 +70,7 @@ int	main(void)
 	if (fd < 0)
 		printf("error al abrir el archivo");
 	char *lines = get_next_line(fd);
+
 	printf("%s", lines);
 	close(fd);
 	return (0);

@@ -24,30 +24,14 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
-size_t	ft_strlcpy(char *dst, const char *src, size_t size)
-{
-	size_t	i;
-
-	i = 0;
-	if (size == 0)
-		return (ft_strlen(src));
-	while (src[i] != '\0' && i < size - 1)
-	{
-		dst[i] = src[i];
-		i++;
-	}
-	dst[i] = '\0';
-	return (ft_strlen(src));
-}
-
 char	*ft_strdup(const char *s)
 {
-	int			i;
-	char		*str;
-	size_t		length;
+	int		i;
+	char	*str;
+	size_t	length;
 
 	length = ft_strlen(s) + 1;
-	str = (char *) malloc(length * sizeof(char));
+	str = (char *)malloc(length * sizeof(char));
 	if (!str)
 		return (NULL);
 	i = 0;
@@ -94,7 +78,7 @@ char	*ft_strjoin(char *let_lines, char *buffer)
 	i = 0;
 	j = 0;
 	len_join = ft_strlen(let_lines) + ft_strlen(buffer);
-	new_line = (char *) malloc((len_join + 1) * sizeof(char));
+	new_line = (char *)malloc((len_join + 1) * sizeof(char));
 	if (!new_line)
 		return (NULL);
 	while (let_lines[i++] != '\0')
@@ -104,4 +88,29 @@ char	*ft_strjoin(char *let_lines, char *buffer)
 	new_line[i] = '\0';
 	free(let_lines);
 	return (new_line);
+}
+
+char	*set_line(char *buffer)
+{
+	int		i;
+	int		bytes;
+	char	*str;
+
+	if (!buffer)
+		return (NULL);
+	bytes = 0;
+	i = 0;
+	while (buffer[bytes] != '\n')
+		bytes++;
+	str = (char *)malloc((bytes + 1) * sizeof(char));
+	if (!str)
+		return (NULL);
+	while (i < bytes)
+	{
+		str[i] = buffer[i];
+		i++;
+	}
+	str[i] = '\0';
+	free(buffer);
+	return (str);
 }
