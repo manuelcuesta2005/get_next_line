@@ -65,7 +65,6 @@ char	*ft_strchr(const char *s, int c)
 char	*ft_strjoin(char *let_lines, char *buffer)
 {
 	char	*new_line;
-	int		len_join;
 	int		i;
 	int		j;
 
@@ -77,14 +76,16 @@ char	*ft_strjoin(char *let_lines, char *buffer)
 		return (ft_strdup(let_lines));
 	i = 0;
 	j = 0;
-	len_join = ft_strlen(let_lines) + ft_strlen(buffer);
-	new_line = (char *)malloc((len_join + 1) * sizeof(char));
+	new_line = (char *)malloc(((ft_strlen(let_lines) + ft_strlen(buffer)) + 1) * sizeof(char));
 	if (!new_line)
 		return (NULL);
 	while (let_lines[i++] != '\0')
 		new_line[i] = let_lines[i];
 	while (buffer[j] != '\0')
-		new_line[i++] = buffer[j++];
+	{
+		new_line[i] = buffer[j++];
+		i++;
+	}
 	new_line[i] = '\0';
 	free(let_lines);
 	return (new_line);
@@ -100,7 +101,7 @@ char	*set_line(char *buffer)
 		return (NULL);
 	bytes = 0;
 	i = 0;
-	while (buffer[bytes] != '\n')
+	while (buffer[bytes] != '\n' && buffer[bytes] != '\0')
 		bytes++;
 	str = (char *)malloc((bytes + 1) * sizeof(char));
 	if (!str)
@@ -110,6 +111,8 @@ char	*set_line(char *buffer)
 		str[i] = buffer[i];
 		i++;
 	}
+	if (buffer[bytes] == '\n')
+		str[i++] = '\n';
 	str[i] = '\0';
 	free(buffer);
 	return (str);
