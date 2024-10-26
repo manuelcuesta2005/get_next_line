@@ -12,107 +12,101 @@
 #include "get_next_line.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdio.h>
 
-void	*free_memory(char **buffer, char **lines)
+char	*extract_line(char **line)
 {
-	if (buffer && *buffer)
+	char	*get_line;
+
+	if (*line && **line != '\0') // Comprobamos que *line contiene texto.
 	{
-		free(*buffer);
-		*buffer = NULL;
+		get_line = ft_strdup(*line);
+		free(*line);
+		*line = NULL;
+		return (get_line);
 	}
-	if (lines && *lines)
+	if (*line)
 	{
-		free(*lines);
-		*lines = NULL;
+		free(*line); // Liberamos solo si contiene texto.
+		*line = NULL;
 	}
 	return (NULL);
 }
 
-char	*get_fd(int fd, char **buffer)
+
+char	*read_fd(int fd, char **line)
 {
-	char	*temp_bytes;
-	char	*new_lines;
-	int		read_bytes;
+	int		bytes_read;
+	char	*temp_line = *line;
+	char	*buffer;
+	char	*new_temp_line;
 
-	if (fd < 0)
-		return (free_memory(buffer, NULL));
-	read_bytes = 1;
-	temp_bytes = malloc((BUFFER_SIZE + 1) * sizeof(char));
-	if (!temp_bytes)
-		return (free_memory(buffer, NULL));
-	while ((!*buffer || !ft_strchr(*buffer, '\n')) && read_bytes != 0)
-	{
-		read_bytes = read(fd, temp_bytes, BUFFER_SIZE);
-		if (read_bytes < 0)
-			return(free_memory(buffer, &temp_bytes));
-		temp_bytes[read_bytes] = '\0';
-		new_lines = ft_strjoin(*buffer, temp_bytes);
-		free(*buffer);
-		*buffer = new_lines;
-		if (!*buffer)
-			return(free_memory(NULL, &temp_bytes));
-	}
-	free(temp_bytes);
-	return (*buffer);
-}
-
-char	*reset_fd(char *buffer)
-{
-	int		start;
-	int		i;
-	char	*str_reset;
-
+	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (!buffer)
 		return (NULL);
-	i = 0;
-	start = 0;
-	while (buffer[start] && buffer[start] != '\n')
-		start++;
-	if (buffer[start] == '\n')
-		start++;
-	str_reset = (char *)malloc((ft_strlen(buffer) - start + 1) * sizeof(char));
-	if (!str_reset)
-		return (NULL);
-	while (buffer[start])
-		str_reset[i++] = buffer[start++];
-	str_reset[i] = '\0';
+	bytes_read = 1;
+	while (!ft_strchr(temp_line, '\n') && bytes_read > 0)
+	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read < 0)
+		{
+			free(buffer);
+			free(temp_line);
+			return (NULL);
+		}
+		buffer[bytes_read] = '\0';
+		new_temp_line = ft_strjoin(temp_line, buffer);
+		if (!new_temp_line)
+		{
+			free(buffer);
+			free(temp_line);
+			return (NULL);
+		}
+		temp_line = new_temp_line;
+	}
 	free(buffer);
-	return (str_reset);
+	*line = temp_line;
+	return (*line);
 }
+
 
 char	*get_next_line(int fd)
 {
 	static char	*line = NULL;
 	char		*get_line;
 
-	line = get_fd(fd, &line);
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (NULL);
+
+	// Lee el archivo si `line` aún no tiene datos
+	if (!line)
+		line = read_fd(fd, &line);
 	if (!line)
 		return (NULL);
-	if (*line == '\0')
-	{
-		free(line);
-		line = NULL;
-		return (NULL);
-	}
-	get_line = set_line(line);
-	line = reset_fd(line);
+
+	// Extrae y devuelve la siguiente línea o el resto del buffer
+	get_line = extract_line(&line);
 	return (get_line);
 }
-#include <fcntl.h>
-#include <stdio.h>
 
-int	main(void)
-{
-	int fd = open("archivo.txt", O_RDONLY);
-	if (fd < 0)
-		printf("error al abrir el archivo");
-	char *lines = get_next_line(fd);
-	while (lines != NULL)
-	{
-		printf("%s", lines);
-		free(lines);
-		lines = get_next_line(fd);
-	}
-	close(fd);
-	return (0);
-}
+
+
+// #include <fcntl.h>
+// #include <stdio.h>
+
+// int	main(void)
+// {
+// 	int fd = open("qj.txt", O_RDONLY);
+// 	if (fd < 0)
+// 		printf("error al abrir el archivo");
+// 	char *lines;
+// 	while ((lines = get_next_line(fd)) != NULL)
+// 	{	
+// 		if(lines == NULL)
+// 			printf("patata");
+// 		printf("%s", lines);
+// 		free(lines);
+// 	}
+// 	close(fd);
+// 	return (0);
+// }

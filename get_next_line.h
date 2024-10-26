@@ -14,7 +14,7 @@
 # define GET_NEXT_LINE
 #include <stddef.h>
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 100000
+#  define BUFFER_SIZE 3
 # endif
 
 char	*ft_strdup(const char *s);

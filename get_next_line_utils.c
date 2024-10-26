@@ -17,7 +17,7 @@ size_t	ft_strlen(const char *s)
 	int	i;
 
 	i = 0;
-	while (s[i] != '\0')
+	while (s && s[i] != '\0')
 	{
 		i++;
 	}
@@ -47,20 +47,23 @@ char	*ft_strdup(const char *s)
 char	*ft_strchr(const char *s, int c)
 {
 	int		i;
-	char	*foundchar;
 
+	if (!s)  // Verificar si 's' es NULL
+		return (NULL);
+	
 	i = 0;
-	foundchar = (char *)s;
 	while (s[i] != '\0')
 	{
-		if (foundchar[i] == (unsigned char)c)
-			return (&foundchar[i]);
+		if (s[i] == (unsigned char)c)  // Comparar directamente con 's[i]'
+			return ((char *)&s[i]);  // Retornar el puntero al char encontrado
 		i++;
 	}
-	if (s[i] == '\0' && (unsigned char)c == '\0')
-		return (&foundchar[i]);
+	if (c == '\0')  // Comparar 'c' con '\0' sin casteo
+		return ((char *)&s[i]);
+	
 	return (NULL);
 }
+
 
 char	*ft_strjoin(char *let_lines, char *buffer)
 {
@@ -70,50 +73,26 @@ char	*ft_strjoin(char *let_lines, char *buffer)
 
 	if (!let_lines && !buffer)
 		return (NULL);
-	if (!let_lines)
-		return (ft_strdup(buffer));
-	if (!buffer)
-		return (ft_strdup(let_lines));
 	i = 0;
 	j = 0;
-	new_line = (char *)malloc(((ft_strlen(let_lines) + ft_strlen(buffer)) + 1) * sizeof(char));
+	new_line = malloc(((ft_strlen(let_lines) + ft_strlen(buffer)) + 1) * sizeof(char));
 	if (!new_line)
 		return (NULL);
-	while (let_lines[i++] != '\0')
-		new_line[i] = let_lines[i];
-	while (buffer[j] != '\0')
+	if (let_lines)
+		while (let_lines[i] != '\0')
+		{
+			new_line[i] = let_lines[i];
+			i++;
+		}
+	while (buffer && buffer[j] != '\0')
 	{
-		new_line[i] = buffer[j++];
+		new_line[i] = buffer[j];
 		i++;
+		j++;
 	}
 	new_line[i] = '\0';
-	free(let_lines);
+	if(let_lines)
+		free(let_lines);
 	return (new_line);
 }
 
-char	*set_line(char *buffer)
-{
-	int		i;
-	int		bytes;
-	char	*str;
-
-	if (!buffer)
-		return (NULL);
-	bytes = 0;
-	i = 0;
-	while (buffer[bytes] != '\n' && buffer[bytes] != '\0')
-		bytes++;
-	str = (char *)malloc((bytes + 1) * sizeof(char));
-	if (!str)
-		return (NULL);
-	while (i < bytes)
-	{
-		str[i] = buffer[i];
-		i++;
-	}
-	if (buffer[bytes] == '\n')
-		str[i++] = '\n';
-	str[i] = '\0';
-	free(buffer);
-	return (str);
-}
