@@ -9,12 +9,12 @@
 /*   Updated: 2024/10/15 10:38:15 by mcuesta-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-char	*extract_and_free_line(char **line)
+char	*extract_line(char **line)
 {
 	char	*get_line;
 
@@ -61,15 +61,15 @@ char	*read_fd(int fd, char **line)
 
 char	*get_next_line(int fd)
 {
-	static char	*line = NULL;
+	static char	*line[1024] = {NULL};
 	char		*get_line;
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || fd >= 1024 || BUFFER_SIZE <= 0)
 		return (NULL);
-	if (!line)
-		line = read_fd(fd, &line);
-	if (!line)
+	if (!line[fd])
+		line[fd] = read_fd(fd, &line[fd]);
+	if (!line[fd])
 		return (NULL);
-	get_line = extract_and_free_line(&line);
+	get_line = extract_line(&line[fd]);
 	return (get_line);
 }

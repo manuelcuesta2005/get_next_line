@@ -9,11 +9,11 @@
 /*   Updated: 2024/10/15 11:08:44 by mcuesta-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#ifndef GET_NEXT_LINE_H
-# define GET_NEXT_LINE_H
+#ifndef GET_NEXT_LINE_BONUS_H
+# define GET_NEXT_LINE_BONUS_H
 # include <stddef.h>
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 1000
+#  define BUFFER_SIZE 1
 # endif
 
 char	*get_next_line(int fd);
