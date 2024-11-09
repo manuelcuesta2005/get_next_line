@@ -14,48 +14,58 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-char	*extract_line(char **line)
+char	*extract_and_free_line(char **line)
 {
 	char	*get_line;
+	char	*new_line;
+	int		i;
 
-	if (*line && **line != '\0')
+	if (!*line || **line == '\0')
+	{
+		free(*line);
+		*line = NULL;
+		return (NULL);
+	}
+	i = 0;
+	while ((*line)[i] && (*line)[i] != '\n')
+		i++;
+	if ((*line)[i] == '\n')
+	{
+		get_line = ft_substr(*line, 0, i + 1);
+		new_line = ft_strdup(*line + i + 1);
+	}
+	else
 	{
 		get_line = ft_strdup(*line);
-		free(*line);
-		*line = NULL;
-		return (get_line);
+		new_line = NULL;
 	}
-	if (*line)
-	{
-		free(*line);
-		*line = NULL;
-	}
-	return (NULL);
+	free(*line);
+	return (*line = new_line, get_line);
 }
 
 char	*read_fd(int fd, char **line)
 {
 	int		bytes_read;
-	char	*temp_line;
 	char	*buffer;
 	char	*new_temp_line;
 
-	temp_line = *line;
 	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
 	if (!buffer)
 		return (NULL);
 	bytes_read = 1;
-	while (!ft_strchr(temp_line, '\n') && bytes_read > 0)
+	while (!ft_strchr(*line, '\n') && bytes_read > 0)
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+			return (free(buffer), free(*line), *line = NULL, NULL);
 		buffer[bytes_read] = '\0';
-		new_temp_line = ft_strjoin(temp_line, buffer);
+		new_temp_line = ft_strjoin(*line, buffer);
 		if (!new_temp_line)
-			return (free(buffer), free(temp_line), NULL);
-		temp_line = new_temp_line;
+			return (free(buffer), free(*line), *line = NULL, NULL);
+		free(*line);
+		*line = new_temp_line;
 	}
 	free(buffer);
-	*line = temp_line;
 	return (*line);
 }
 
@@ -67,9 +77,9 @@ char	*get_next_line(int fd)
 	if (fd < 0 || fd >= 1024 || BUFFER_SIZE <= 0)
 		return (NULL);
 	if (!line[fd])
-		line[fd] = read_fd(fd, &line[fd]);
-	if (!line[fd])
+		line[fd] = ft_strdup("");
+	if (!read_fd(fd, &line[fd]))
 		return (NULL);
-	get_line = extract_line(&line[fd]);
+	get_line = extract_and_free_line(&line[fd]);
 	return (get_line);
 }
